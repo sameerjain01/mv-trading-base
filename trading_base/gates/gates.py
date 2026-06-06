@@ -116,16 +116,16 @@ def gate_session_window(
     if cross_midnight:
         weekday = local.weekday()
         if weekday == 5:
-            return GateResult.fail(RejectionCode.OUTSIDE_SESSION_WINDOW, "Globex closed: Saturday")
+            return GateResult.fail(RejectionCode.OUTSIDE_SESSION_WINDOW, "exchange closed: Saturday")
         if weekday == 6 and local < session_open:
             return GateResult.fail(
                 RejectionCode.OUTSIDE_SESSION_WINDOW,
-                f"Globex not yet open: {local.strftime('%H:%M')} ET",
+                f"exchange not yet open: {local.strftime('%H:%M')} ET",
             )
         if weekday == 4 and local >= session_close:
             return GateResult.fail(
                 RejectionCode.OUTSIDE_SESSION_WINDOW,
-                f"Globex closed for weekend: {local.strftime('%H:%M')} ET",
+                f"exchange closed for weekend: {local.strftime('%H:%M')} ET",
             )
         if weekday < 4 and not (local >= session_open or local < session_close):
             return GateResult.fail(

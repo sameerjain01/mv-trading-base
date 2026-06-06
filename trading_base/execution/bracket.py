@@ -15,7 +15,7 @@ class InvalidOrderError(Exception):
     pass
 
 
-OCA_CANCEL_WITH_REDUCE = 3  # IBKR OCA type 3: cancel remaining at fill, reduce others
+OCA_CANCEL = 1  # IBKR OCA type 1: cancel all remaining orders when one fills
 
 
 @dataclass(frozen=True)
@@ -65,7 +65,7 @@ def build_bracket_order(
         stopPrice=float(stop_lmt),  # float required by ib_async Order API — Decimal quantized to tick before conversion
         tif=OrderTIF.GTC.value,
         ocaGroup=oca_group,
-        ocaType=OCA_CANCEL_WITH_REDUCE,
+        ocaType=OCA_CANCEL,
         transmit=False,
     )
 
@@ -75,7 +75,7 @@ def build_bracket_order(
         lmtPrice=float(target_lmt),  # float required by ib_async Order API — Decimal quantized to tick before conversion
         tif=OrderTIF.GTC.value,
         ocaGroup=oca_group,
-        ocaType=OCA_CANCEL_WITH_REDUCE,
+        ocaType=OCA_CANCEL,
     )
 
     return BracketOrder(
