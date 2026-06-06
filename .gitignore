@@ -1,0 +1,34 @@
+# Planning and spec documents (not part of the library)
+assessment.md
+qqq-regime-specs.md
+trading-base-migration-plan-for-mv-afts.md
+trading-base-specs.md
+trading-system-context.md
+
+# Python generated
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# Test and tooling cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Claude memory
+.claude/
