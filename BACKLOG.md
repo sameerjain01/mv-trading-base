@@ -29,3 +29,4 @@ Fill these in as modules are touched during active development.
 | Position sizing with live equity | `PositionSizer` currently uses static equity input; live equity fetch from broker not wired |
 | Regime persistence across restarts | `RegimeManager` loses state on restart; persist last known regime to state file |
 | Journal GitHub push | Moved out of MV-AFTS into base if pattern is reused by other strategies |
+| MV-AFTS async IBKR migration | `IBKRConnectionManager` is sync; `IBKRAdapter` is async. Full migration requires making `process_signal` async in MV-AFTS — reserved for a dedicated architectural task. Exception classes (`IBKRConnectionError`, `IBKRDataError`) already re-exported from trading_base as of trading-base-migration branch. |
