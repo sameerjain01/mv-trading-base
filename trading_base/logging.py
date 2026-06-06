@@ -57,7 +57,23 @@ def setup_logging(log_file: Path) -> None:
 def send_alert(message: str, level: str = "CRITICAL", extra: dict | None = None) -> None:
     logger = logging.getLogger(__name__)
     logger.log(logging.CRITICAL, message, extra=extra or {})
+    _write_alerts_log(level, message)
     _try_smtp(level, message)
+
+
+def _write_alerts_log(level: str, message: str) -> None:
+    alerts_log_path = environ.get("ALERTS_LOG")
+    if not alerts_log_path:
+        return
+    try:
+        import datetime as _dt
+        alerts_log = Path(alerts_log_path)
+        alerts_log.parent.mkdir(parents=True, exist_ok=True)
+        ts = _dt.datetime.now(_dt.timezone.utc).isoformat()
+        with open(alerts_log, "a", encoding="utf-8") as fh:
+            fh.write(f"{ts} [{level}] {message}\n")
+    except OSError:
+        logging.getLogger(__name__).warning("Failed to write ALERTS_LOG", exc_info=True)
 
 
 def _try_smtp(level: str, message: str) -> None:
