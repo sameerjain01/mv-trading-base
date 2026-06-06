@@ -62,6 +62,8 @@ def send_alert(message: str, level: str = "CRITICAL", extra: dict | None = None)
 
 
 def _write_alerts_log(level: str, message: str) -> None:
+    if level.upper() != "CRITICAL":
+        return
     alerts_log_path = environ.get("ALERTS_LOG")
     if not alerts_log_path:
         return
