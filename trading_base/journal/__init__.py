@@ -1,3 +1,4 @@
+from trading_base.journal.github_push import push_file
 from trading_base.journal.export import (
     RiskAdjustedMetrics,
     compute_risk_adjusted_pnl,
@@ -14,6 +15,7 @@ from trading_base.journal.writer import (
 )
 
 __all__ = [
+    "push_file",
     "init_db",
     "write_trade",
     "update_trade_exit",
