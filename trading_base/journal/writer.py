@@ -146,3 +146,20 @@ def write_system_event(
             (ts, event_type, message, extra_json),
         )
     logger.info("System event written", extra={"event_type": event_type, "event_msg": message})
+
+
+def read_today_events(db_path: Path) -> list[tuple[str, str, str]]:
+    """Return (timestamp, event_type, message) rows for today (UTC date).
+
+    Returns an empty list if the DB does not exist yet.
+    """
+    if not db_path.exists():
+        return []
+    today_prefix = datetime.now(timezone.utc).date().isoformat()
+    with sqlite3.connect(db_path) as conn:
+        rows = conn.execute(
+            "SELECT timestamp, event_type, message FROM system_events "
+            "WHERE timestamp LIKE ? ORDER BY id ASC",
+            (f"{today_prefix}%",),
+        ).fetchall()
+    return rows

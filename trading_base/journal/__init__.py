@@ -8,6 +8,7 @@ from trading_base.journal.export import (
 )
 from trading_base.journal.writer import (
     init_db,
+    read_today_events,
     update_trade_exit,
     write_rejection,
     write_system_event,
@@ -21,6 +22,7 @@ __all__ = [
     "update_trade_exit",
     "write_rejection",
     "write_system_event",
+    "read_today_events",
     "export_trades_csv",
     "export_rejections_csv",
     "compute_risk_adjusted_pnl",
