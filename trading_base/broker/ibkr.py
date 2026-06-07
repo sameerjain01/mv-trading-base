@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 from decimal import ROUND_DOWN, ROUND_HALF_EVEN, Decimal
@@ -75,7 +76,7 @@ class IBKRAdapter:
         from ib_async import IB
         ib = IB()
         try:
-            ib.connect(
+            await ib.connectAsync(
                 self._cfg.host,
                 port,
                 clientId=self._cfg.client_id,
@@ -94,7 +95,7 @@ class IBKRAdapter:
 
         self._ib = ib
         logger.info("IBKR connection established", extra={"port": port})
-        self._prewarm_hmds()
+        await self._prewarm_hmds()
 
     async def disconnect(self) -> None:
         if self._ib is not None and self._ib.isConnected():
@@ -341,8 +342,8 @@ class IBKRAdapter:
         if not self.is_connected():
             return ReconciliationResult(state=ReconciliationState.UNKNOWN)
 
-        self._ib.reqAllOpenOrders()
-        time.sleep(1)
+        await self._ib.reqAllOpenOrdersAsync()
+        await asyncio.sleep(1)
 
         try:
             positions = await self.get_open_positions(symbol)
@@ -422,12 +423,12 @@ class IBKRAdapter:
         logger.warning("Entry fill timeout", extra={"order_id": order_id})
         return False, None
 
-    def _prewarm_hmds(self) -> None:
+    async def _prewarm_hmds(self) -> None:
         if self._ib is None:
             return
         contract = self._build_contract(self._instrument_cfg)
         try:
-            bars = self._ib.reqHistoricalData(
+            bars = await self._ib.reqHistoricalDataAsync(
                 contract,
                 endDateTime="",
                 durationStr="120 S",

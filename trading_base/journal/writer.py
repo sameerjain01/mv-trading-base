@@ -145,4 +145,4 @@ def write_system_event(
             "INSERT INTO system_events (timestamp, event_type, message, extra_json) VALUES (?,?,?,?)",
             (ts, event_type, message, extra_json),
         )
-    logger.info("System event written", extra={"event_type": event_type, "message": message})
+    logger.info("System event written", extra={"event_type": event_type, "event_msg": message})
