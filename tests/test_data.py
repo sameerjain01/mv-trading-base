@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from trading_base.data.ivr import IVRHistory, calculate_ivr, iv_from_vix
+from trading_base.data.ivr import DataValidationError, IVRHistory, calculate_ivr, iv_from_vix
 
 
 def test_calculate_ivr_at_max():
@@ -61,11 +61,11 @@ def test_iv_from_vix_unknown_uses_default():
 
 def test_ivr_history_add_and_compute(tmp_path):
     h = IVRHistory(lookback=252)
-    for i in range(1, 253):
-        from datetime import date
-        d = date(2025, 1, 1)
-        # simulate different dates by using index as date offset
-        h.add(d, Decimal(str(i)))
+    from datetime import date, timedelta
+    for i in range(252):
+        d = date(2025, 1, 1) + timedelta(days=i)
+        # Valid raw IV values: 0.10 → 0.361 (realistic range for QQQ)
+        h.add(d, Decimal("0.10") + Decimal(str(i)) * Decimal("0.001"))
     result = h.current_ivr()
     assert result is not None
     assert isinstance(result, Decimal)
@@ -74,7 +74,7 @@ def test_ivr_history_add_and_compute(tmp_path):
 def test_ivr_history_insufficient_returns_none():
     h = IVRHistory(lookback=252)
     from datetime import date
-    h.add(date(2025, 1, 1), Decimal("20"))
+    h.add(date(2025, 1, 1), Decimal("0.20"))
     assert h.current_ivr() is None
 
 
@@ -83,10 +83,32 @@ def test_ivr_history_persist_and_load(tmp_path):
     h = IVRHistory(lookback=5)
     from datetime import date
     for i in range(5):
-        h.add(date(2025, 1, i + 1), Decimal(str(i + 1)))
+        h.add(date(2025, 1, i + 1), Decimal("0.10") + Decimal(str(i)) * Decimal("0.05"))
     h.save_to_db(db)
 
     h2 = IVRHistory(lookback=5)
     h2.load_from_db(db)
     result = h2.current_ivr()
     assert result is not None
+
+
+def test_ivr_history_add_rejects_below_minimum():
+    h = IVRHistory(lookback=252)
+    from datetime import date
+    with pytest.raises(DataValidationError):
+        h.add(date(2025, 1, 1), Decimal("0.05"))
+
+
+def test_ivr_history_add_rejects_above_maximum():
+    h = IVRHistory(lookback=252)
+    from datetime import date
+    with pytest.raises(DataValidationError):
+        h.add(date(2025, 1, 1), Decimal("2.50"))
+
+
+def test_ivr_history_add_accepts_boundary_values():
+    h = IVRHistory(lookback=252)
+    from datetime import date
+    h.add(date(2025, 1, 1), Decimal("0.10"))  # exact min
+    h.add(date(2025, 1, 2), Decimal("2.00"))  # exact max
+    assert len(h._history) == 2

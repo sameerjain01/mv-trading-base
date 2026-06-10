@@ -6,12 +6,19 @@ from decimal import ROUND_HALF_EVEN, Decimal
 from pathlib import Path
 from typing import Optional
 
+MIN_VALID_IV: Decimal = Decimal("0.10")
+MAX_VALID_IV: Decimal = Decimal("2.00")
+
 IV_PROXY_COEFFICIENTS: dict[str, Decimal] = {
     "SPY": Decimal("0.90"),
     "QQQ": Decimal("1.10"),
     "IWM": Decimal("1.15"),
     "DEFAULT": Decimal("1.00"),
 }
+
+
+class DataValidationError(ValueError):
+    """Raised when an IV value is outside the acceptable range."""
 
 
 def calculate_ivr(
@@ -54,6 +61,11 @@ class IVRHistory:
         self._history: list[tuple[date, Decimal]] = []
 
     def add(self, d: date, iv: Decimal) -> None:
+        if not (MIN_VALID_IV <= iv <= MAX_VALID_IV):
+            raise DataValidationError(
+                f"IV value {iv} on {d} is outside valid range "
+                f"[{MIN_VALID_IV}, {MAX_VALID_IV}]"
+            )
         self._history.append((d, iv))
         if len(self._history) > self._lookback * 2:
             self._history = self._history[-self._lookback * 2:]
