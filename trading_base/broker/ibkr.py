@@ -255,6 +255,12 @@ class IBKRAdapter:
 
         try:
             contract = self._build_contract(instrument_cfg)
+            if not contract.conId:
+                await self._ib.qualifyContractsAsync(contract)
+            if not contract.conId:
+                raise RuntimeError(
+                    f"Contract {contract} not resolved by IBKR — conId still 0 after qualify"
+                )
             entry_trade = self._ib.placeOrder(contract, bracket.entry)
             stop_trade = self._ib.placeOrder(contract, bracket.stop)
             target_trade = self._ib.placeOrder(contract, bracket.target)
